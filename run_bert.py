@@ -213,7 +213,74 @@ class Offen_2_Processor(DataProcessor):
                     InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
        
         return examples
-    
+
+
+class HatevalHate_Processor(DataProcessor):
+    def get_train_examples(self, data_dir):
+        """See base class."""
+
+        ""
+        return self._create_trn_examples(
+            self._read_tsv(os.path.join(data_dir, "hateval_public_development_en/train_en.tsv")), "train")
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        #        return self._create_test_examples(
+        #            self._read_tsv(os.path.join(data_dir, "testset-taska.tsv")), "dev")
+        return self._create_dev_examples(
+            self._read_tsv(os.path.join(data_dir, "hateval_public_development_en/dev_en.tsv")), "dev")
+
+    def get_labels(self):
+        """See base class."""
+        return ["0", "1"]
+
+    def _create_trn_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for (i, line) in enumerate(lines):
+            #            guid = "%s-%s" % (set_type, i)
+            guid = line[0]
+            text_a = line[1]
+            if line[2] == 1:
+                label = '1'
+                print("train found hate")
+            else:
+                label = '0'
+                print("train no hate")
+            examples.append(
+                InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+        return examples
+
+    def _create_dev_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for (i, line) in enumerate(lines):
+            guid = line[0]
+            text_a = line[1]
+            if line[2] == 1:
+                label = '1'
+                print("test found hate")
+            else:
+                label = '0'
+                print("test no hate")
+            examples.append(
+                InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+        return examples
+
+
+"""
+    def _create_test_examples(self, lines, set_type):
+        examples = []
+        for (i, line) in enumerate(lines):
+            if i != 0:
+                #            guid = "%s-%s" % (set_type, i)
+                guid = line[0]
+                text_a = line[1]
+                label = '0'
+                examples.append(
+                    InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+        return examples
+"""
 
 
 def convert_examples_to_features(examples, label_list, max_seq_length, tokenizer):
@@ -412,12 +479,16 @@ def main():
 
     processors = {
         "one": Offen_1_Processor,
-        "two": Offen_2_Processor
+        "two": Offen_2_Processor,
+        "hatevalhate": HatevalHate_Processor,
+        "hatevalaggression": HatevalAggression_Processor
     }
 
     num_labels_task = {
         "one": 2,
-        "two": 2
+        "two": 2,
+        "hatevalhate": 2,
+        "hatevalaggression": 2
     }
 
     if args.local_rank == -1 or args.no_cuda:
@@ -643,3 +714,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    v = 1 + "hello"
